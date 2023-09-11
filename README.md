@@ -1,38 +1,38 @@
-# RTOS Communicating Tasks Project
- 
-Project Specifications
-The project is implemented using FreeRTOS on the target emulation board provided via Eclipse CDT
-Embedded.
-Four tasks communicate via a queue of fixed size as described below:
-There are three sender tasks. Two has same priority and one has a higher priority. Each sender task sleeps 
-for a RANDOM period of time Tsender and when it wakes up it sends a message to the queue containing 
-the string “Time is XYZ” where XYZ is current time in system ticks. If the queue is full, the sending 
-operation fails and a counter counting total number of blocked messages is incremented. Upon successful 
-sending, a counter counting total number of transmitted messages is incremented. These counters should be 
-kept per task. The sender task is then blocked for another random period again. The random period is drawn 
-from a uniform distribution as specified below. 
-The receiver task sleeps for another FIXED period of time Treceiver and then wakes up and checks for any 
-received message in the queue. If there is a message in the queue, it reads it, increments total number of 
-Embedded Systems Project 2023 Page 2 of 2 Revision: 1.0
-received messages and sleeps again. If there is no message it sleeps again immediately. Note that receiver 
-reads one message at a time even if there are more than one message in the queue.
-The sleep/wake control of the three tasks is performed via three timers one for each task. The callback
-function for each timer is specified as follows:
-Sender Timer Callback Function: When called it releases a dedicated semaphore on which the sender task is
-waiting/blocked on. The sender task is then unblocked and can send to the queue.
-Receiver Timer Callback Function: When called it releases a dedicated semaphore on which the receiver task
-is waiting/blocked on. The receiver task is then unblocked and performs a read on the queue as described
-above. When the receiver receives 1000 messages, the receiver timer callback function calls the “Reset”
-function that performs the following:
-1- Print the total number of successfully sent messages and the total number of blocked messages
-2- Print the statistics per sender task (the high priority and the two lower priority tasks). 
-3- Reset t h e total number of successfully sent messages, t h e total number of blocked messages
-and received message
-4- Clears the queue
-5- Configure the values controlling the sender timer period Tsender to the next values in two arrays
-specifying the lower and upper bound values of the uniformly distributed timer period. The first array
-holds the values {50, 80, 110, 140, 170, 200} and the second holds the values {150, 200, 250, 300, 
-350, 400} expressing in msec the timer lower and upper bounds for a uniform distribution. When the 
-system starts initially it starts with the values 50 and 150. If all values in the array are used, destroy 
-the timers and print a message “Game Over”and stop execution.
-6- In all iterations Treceiver is fixed at 100 msec,
+# Real-Time Operating System (RTOS) Communication Project
+
+## Overview
+
+This project demonstrates the use of FreeRTOS on an embedded target emulation board within Eclipse CDT. It involves the coordination of four tasks through a fixed-size queue. The tasks consist of three sender tasks, each with its own characteristics, and a receiver task. The primary goal is to showcase task synchronization and communication in a real-time environment.
+
+## Task Descriptions
+
+### Sender Tasks
+
+1. **Sender 1 and Sender 2**: These two sender tasks have equal priorities. Each task periodically sends a message to the shared queue. The message contains the string "Time is XYZ," where XYZ represents the current system time in ticks. If the queue is full when a sender attempts to send a message, it results in a failed sending operation, and a counter tracking blocked messages is incremented. On successful message transmission, a counter for total transmitted messages is incremented. Both sender tasks then enter a sleep state for a random period.
+
+2. **Sender 3**: This sender task has a higher priority compared to Sender 1 and Sender 2. It follows the same logic for sending messages, blocking on queue full, and updating message counters. After sending a message, Sender 3 also enters a random sleep state.
+
+### Receiver Task
+
+The receiver task periodically wakes up at fixed intervals. It checks the shared queue for any incoming messages. If a message is present, it reads and processes it, incrementing a counter for received messages. If the queue is empty, the receiver task goes back to sleep immediately. Importantly, the receiver reads one message at a time, even if multiple messages are available in the queue.
+
+### Task Scheduling
+
+The sleep and wake behavior of all three sender tasks is managed using individual timers. Each sender task has its dedicated timer, which, upon expiration, releases a semaphore. This semaphore unblocks the respective sender task, allowing it to send messages to the queue. Similarly, the receiver task has its timer that unblocks it when it's time to check the queue for incoming messages.
+
+## Completion Criteria
+
+When the receiver task has successfully received 1000 messages, the following actions are taken:
+
+1. Print the total number of successfully sent messages and the total number of blocked messages.
+2. Display statistics for each sender task, including the high-priority sender and the two lower-priority senders.
+3. Reset the counters for successfully sent messages, blocked messages, and received messages.
+4. Clear the shared message queue.
+5. Configure the sender timers' period (Tsender) to new values drawn from predefined arrays representing lower and upper bounds for a uniform distribution.
+6. If all values in the timer period arrays are exhausted, the system terminates with a message "Game Over."
+
+## Initial Configuration
+
+In the initial system startup, Tsender values are set to 50 and 150 msec, and Treceiver remains fixed at 100 msec.
+
+**Note:** This project provides a practical demonstration of real-time task synchronization and communication, making it a valuable learning resource for embedded systems development with FreeRTOS.
